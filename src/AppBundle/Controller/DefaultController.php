@@ -2,6 +2,9 @@
 
 namespace AppBundle\Controller;
 
+use Liip\ImagineBundle\Async\Commands;
+use Liip\ImagineBundle\Async\Topics;
+use Liip\ImagineBundle\Async\ResolveCache;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,17 +17,14 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-        /** @var CacheManager */
-        $imagineCacheManager = $this->get('liip_imagine.cache.manager');
+        /**
+         * @var ContainerInterface $container
+         * @var ProducerInterface $producer
+         */
+        $producer = $this->get('enqueue.producer');
+        $reply = $producer->sendCommand(Commands::RESOLVE_CACHE, new ResolveCache('poster.jpg', ['rosh'], true), true);
 
-        /** @var string */
-        $resolvedPath = $imagineCacheManager->getBrowserPath('/poster.jpg', 'rosh');
-
-        //return new JsonResponse($resolvedPath);
-        // replace this example code with whatever you need
-        return $this->render('default/index.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
-            'resolvedPath' => $resolvedPath
-        ]);
+        $replyMessage = $reply->receive(2000); // wait for 20 sec
+        dump($replyMessage);die();
     }
 }

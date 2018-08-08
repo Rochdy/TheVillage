@@ -69,9 +69,12 @@ swiftmailer:
 sensio_framework_extra:
    router:
         annotations: false
-
+enqueue:
+    transport:
+        default: 'amqp:'
+    client: ~
 liip_imagine:
-
+    enqueue: true
     # configure resolvers
     resolvers:
 
